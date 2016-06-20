@@ -37,6 +37,7 @@ RUN apk add --no-cache -X http://dl-4.alpinelinux.org/alpine/v3.1/main \
 RUN gem install -N \
       facter \
       rack \
+      CFPropertyList \
       puppet:=${PUPPET_VERSION} \
     && \
     rm -fr /root/.gem*
