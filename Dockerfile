@@ -35,7 +35,6 @@ RUN apk add --no-cache -X http://dl-4.alpinelinux.org/alpine/v3.1/main \
 
 # Install gems compatible with ruby < 2.2
 RUN gem install -N \
-      etcd \
       facter \
       rack \
       puppet:=${PUPPET_VERSION} \
@@ -43,22 +42,6 @@ RUN gem install -N \
     rm -fr /root/.gem*
 
 RUN adduser -D puppet
-
-# Install appropriate version of puppetdb-terminus and hiera-etcd backend.
-# https://github.com/puppetlabs/puppetdb/blob/2.3.x/documentation/connect_puppet_master.markdown
-# https://docs.puppetlabs.com/puppetdb/2.3/connect_puppet_master.html#on-platforms-without-packages
-RUN apk add -U curl && \
-    curl -L -O https://github.com/puppetlabs/puppetdb/archive/${PUPPETDB_VERSION}.tar.gz && \
-    tar xzf ${PUPPETDB_VERSION}.tar.gz -C /tmp && \
-    cp -r /tmp/puppetdb-${PUPPETDB_VERSION}/puppet/lib/puppet /usr/lib/ruby/2.1.0/puppet && \
-    rm -fr /tmp/${PUPPETDB_VERSION}.tar.gz && \
-    rm -fr /tmp/puppetdb-${PUPPETDB_VERSON} && \
-    cd /tmp/ && \
-    curl -sS -L -O https://raw.githubusercontent.com/garethr/hiera-etcd/master/lib/hiera/backend/etcd_backend.rb && \
-    cp etcd_backend.rb /usr/lib/ruby/gems/2.1.0/gems/puppet-${PUPPET_VERSION}/lib/hiera/backend && \
-    cp etcd_backend.rb /usr/lib/ruby/gems/2.1.0/gems/hiera-*/lib/hiera/backend && \
-    apk del --purge curl && \
-    rm -f /var/cache/apk/*
 
 # Put configs and scripts in place.
 COPY . /
@@ -69,10 +52,10 @@ RUN /usr/sbin/prepare.sh
 RUN /usr/sbin/harden.sh
 
 # Do not persist anything in these dirs.
-VOLUME ["/var/lib/", "/var/log", "/tmp", "/etc/s6"]
+VOLUME ["/var/lib/puppet", "/var/log/puppet"]
 
 # We use dynamic environments.
-VOLUME ["/opt/puppet/environments/"]
+VOLUME ["/opt/puppet/environments"]
 
 EXPOSE 8140
 

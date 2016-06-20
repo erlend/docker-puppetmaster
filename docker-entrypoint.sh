@@ -1,5 +1,10 @@
 #!/bin/sh
 
+dir=/docker-entrypoint.d
+
+# Run scripts in $dir
+[ -d $dir ] && run-parts $dir
+
 # Init with s6 if CMD is blank
 [ -z $1 ] && set -- s6-svscan /etc/s6
 
