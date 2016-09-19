@@ -3,8 +3,14 @@
 dir=/docker-entrypoint.d
 fqdn=`hostname -f`
 
-# Run scripts in $dir
-[ -d $dir ] && run-parts $dir
+# Configure NGINX
+sed -e "s|\(ssl_certificate *$ssldir/certs/\).*|\1$fqdn.pem;|" \
+    -e "s|\(ssl_certificate_key *$ssldir/private_keys/\).*|\1$fqdn.pem;|" \
+    -i /etc/nginx.conf
+
+# Configure Unicorn
+sed -e "s|\(worker_processes\).*|\1 $PUPPET_WORKERS|" \
+    -i /etc/puppet/unicorn.conf
 
 if [ -z $1 ]; then
   if [ -f /var/lib/puppet/ssl/certs/ca.pem ]; then

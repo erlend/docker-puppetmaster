@@ -1,5 +1,7 @@
 FROM alpine:3.4
 
+ENV PUPPET_WORKERS 128
+
 ENV PUPPET_VERSION 3.8.7
 
 # Must match puppetdb container version.
