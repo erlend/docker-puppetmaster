@@ -36,7 +36,7 @@ RUN apk add --no-cache -X http://dl-4.alpinelinux.org/alpine/v3.1/main \
 # Install gems compatible with ruby < 2.2
 RUN gem install -N \
       facter \
-      rack \
+      'rack:<2' \
       CFPropertyList \
       puppet:=${PUPPET_VERSION} \
     && \
