@@ -1,6 +1,6 @@
-FROM alpine:3.4
+FROM alpine:3.6
 
-ENV PUPPET_WORKERS 128
+ENV PUPPET_WORKERS 4
 
 ENV PUPPET_VERSION 3.8.7
 
@@ -10,44 +10,40 @@ ENV PUPPETDB_VERSION 2.3.8
 # Dependencies:
 #   shadow - puppet
 #   util-linux - uuidgen for puppet
-#   ruby < 2.2 (from alpine 3.1) to avoid syck errors in puppet 3.x
 #   git - to calculate config_version of puppet repo
-#
-# https://tickets.puppetlabs.com/browse/PUP-3796 (syck error in ruby 2.2)
-#
-# http://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management#Holding_a_specific_package_back
-#
-RUN apk add --no-cache -X http://dl-4.alpinelinux.org/alpine/v3.1/main \
-      'ruby<2.2' \
-      ruby-unicorn \
-    && \
-    apk add --no-cache \
-      ca-certificates \
+
+RUN build_deps="alpine-sdk ruby-dev" && \
+    apk add -U $build_deps \
+      ruby \
       git \
       nginx \
-      'openssl>=1.0.2h-r0' \
+      openssl \
+      util-linux \
+      shadow \
       s6 \
       s6-portable-utils \
-      util-linux \
-    && \
-    apk add --no-cache -X http://dl-4.alpinelinux.org/alpine/edge/community \
-      shadow \
-    && \
-    :
-
-# Install gems compatible with ruby < 2.2
-RUN gem install -N \
+      && \
+    gem install -N \
+      puma \
+      syck \
       facter \
       'rack:<2' \
       CFPropertyList \
       puppet:=${PUPPET_VERSION} \
-    && \
-    rm -fr /root/.gem*
+      && \
+    apk del $build_deps && \
+    rm -r /root/.gem* /var/cache/apk/*
 
 RUN adduser -D puppet
 
-# Put configs and scripts in place.
+# Put configs and scripts in place
 COPY . /
+
+# Fix issue with syck in Ruby >= 2.2
+RUN puppet_dir=$(dirname `gem which puppet`)/.. && \
+    cp $puppet_dir/ext/rack/config.ru /etc/puppet && \
+    sed -e "/\sSyck.module_eval/i\\  require 'syck' if RUBY_VERSION >= '2.2'" \
+        -i $puppet_dir/lib/puppet/vendor/safe_yaml/lib/safe_yaml/syck_node_monkeypatch.rb
 
 # Harden the image.
 # This must be done *before* we configure volumes.

@@ -13,12 +13,10 @@ set -e
 #        setting the --logfile and --logpriority options.
 
 # Setup paths for nginx to run with read-only root fs.
-mkdir -p /tmp/nginx/
+mkdir -p /var/tmp/nginx/
 mkdir -p /var/log/nginx/
 mkdir -p /usr/share/nginx
-ln -fs /tmp /usr/uwsgi_temp
-ln -fs /tmp /usr/scgi_temp
-chown puppet:puppet /tmp/nginx /var/log/nginx /usr/uwsgi_temp /usr/scgi_temp /usr/share/nginx
+chown puppet:puppet /var/log/nginx /usr/share/nginx
 
 # Ensure correct permissions for puppet dirs.
 mkdir -p /var/lib/puppet/ssl
@@ -30,10 +28,8 @@ chmod 0755 /var/log/puppet
 chown -R puppet:puppet /var/lib/puppet/ssl
 
 # nginx buffers client request body here.
-mkdir -p /var/lib/nginx/tmp/client_body
-chown -R puppet:puppet /var/lib/nginx
-
-#cp -f /usr/lib/ruby/gems/2.1.0/gems/puppet-${PUPPET_VERSION}/ext/rack/config.ru /etc/puppet/
+mkdir -p /var/tmp/nginx/client_body
+chown -R puppet:puppet /var/lib/nginx /var/tmp/nginx
 
 mkdir -p /var/run/puppet || :
 chown puppet:puppet /var/run/puppet

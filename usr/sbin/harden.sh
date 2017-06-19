@@ -41,7 +41,7 @@ find $sysdirs -xdev -type d \
 
 # But let puppet own /etc/s6 to `mkfifodir event`.
 chown -R puppet:puppet /etc/s6/nginx
-chown -R puppet:puppet /etc/s6/unicorn
+chown -R puppet:puppet /etc/s6/puma
 chown -R puppet:puppet /usr/share/nginx
 
 # We need `chage' but not suid.
