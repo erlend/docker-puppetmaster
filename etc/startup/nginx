@@ -1,0 +1,10 @@
+#!/bin/sh
+
+ssldir=/var/lib/puppet/ssl
+certname=`hostname`
+
+# Set correct certificte
+sed -e "s|\(ssl_certificate *$ssldir/certs/\).*|\1$certname.pem;|" \
+    -e "s|\(ssl_certificate_key *$ssldir/private_keys/\).*|\1$certname.pem;|" \
+    -i /etc/nginx.conf
+

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Generate certificates if ca is not configured
+if [ ! -f /var/lib/puppet/ssl/certs/ca.pem ]; then
+  ruby -w /usr/sbin/setup_puppet_ca.rb
+fi
